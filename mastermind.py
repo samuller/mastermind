@@ -66,7 +66,7 @@ def valid_possibility(prev_guess: List[T], prev_result: Collection[GuessResult],
     guess should be the same as the relationship between the previous guess and the solution.
     """
     cmp_result = validate_solution(prev_guess, next_guess)
-    return set(prev_result) == set(cmp_result)
+    return list(prev_result) == list(cmp_result)
 
 
 def generate_combination(options: List[Any], count: int=4, duplicates=True):
