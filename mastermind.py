@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import itertools
-import numpy as np
 from enum import Enum
 from random import randint
-import matplotlib.pyplot as plt
 from typing import Any, Collection, List, Tuple, TypeVar
 
 
@@ -144,6 +142,9 @@ def main():
 
     import collections
     print(collections.Counter(solve_counts))
+
+    import numpy as np
+    import matplotlib.pyplot as plt
     # hist, bins = np.histogram(solve_counts)
     plt.hist(solve_counts, 0.5 + np.arange(0, 12))
     plt.title("Histogram of guesses needed")
