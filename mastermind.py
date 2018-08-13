@@ -29,7 +29,7 @@ def identify_colour_matches(solution: List[T], guess: List[T]) -> Collection[T]:
     return color_matches
 
 
-def validate_solution(solution, guess: List[T]) -> List[GuessResult]:
+def validate_solution(solution: List[T], guess: List[T]) -> List[GuessResult]:
     if solution == guess:
         return [GuessResult.EXACT_MATCH] * len(guess)
 
@@ -84,7 +84,7 @@ def generate_combination(options: List[Any], count: int=4, duplicates=True):
     return combination
 
 
-def all_choices(options, count=4, duplicates=True):
+def all_choices(options: List[Any], count: int=4, duplicates: bool=True):
     all_options = list(options)
     if duplicates:
         all_options = options * count
@@ -93,37 +93,42 @@ def all_choices(options, count=4, duplicates=True):
     return set(itertools.permutations(all_options, count))
 
 
-def main():
-    OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
-
-    solution = generate_combination(OPTIONS)
-    print("Secret solution:", solution)
-
-    # prev_guess = generate_combination(OPTIONS)
-    # print(prev_guess)
-
-    mm = MasterMind(solution)
-    # result = mm.validate(prev_guess)
-    # print([res.name for res in result])
+def iteratively_solve(mm: MasterMind, options: List[T], length: int=4) -> List[T]:
+    guess = None
     result = None
 
-    all_valid_choices = sorted(list(all_choices(OPTIONS)))
-    print(len(all_valid_choices))
+    all_valid_choices = sorted(list(all_choices(options)))
+    print("Possibilities: ", len(all_valid_choices))
+    print()
+
     clues = []
     count = 0
-    while result != [GuessResult.EXACT_MATCH] * len(solution):
+    while result != [GuessResult.EXACT_MATCH] * length:
         count += 1
+
         guess = all_valid_choices[0]
         print("Guess {}: {}".format(count, guess))
         result = mm.validate(guess)
         print("Result:", [res.name for res in result])
 
         all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
-        print(len(all_valid_choices))
-        print(all_valid_choices[0:10])
-        print(valid_possibility(guess, result, all_valid_choices[0]))
+        print("Possibilities: ", len(all_valid_choices))
+        # print(all_valid_choices[0:10])
+        # print(valid_possibility(guess, result, all_valid_choices[0]))
         clues.append((guess, result))
-        exit()
+        print()
+
+    return guess
+
+
+def main():
+    OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
+
+    solution = generate_combination(OPTIONS)
+    print("Secret solution:", solution)
+
+    mm = MasterMind(solution)
+    iteratively_solve(mm, OPTIONS)
 
     # solution = ['red', 'white', 'white', 'white']
     # prev_guess = ['purple', 'purple', 'white', 'yellow']
