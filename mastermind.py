@@ -97,26 +97,37 @@ def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
 
     solution = generate_combination(OPTIONS)
-    print(solution)
+    print("Secret solution:", solution)
 
-    guess = generate_combination(OPTIONS)
-    print(guess)
+    # prev_guess = generate_combination(OPTIONS)
+    # print(prev_guess)
 
     mm = MasterMind(solution)
-    result = mm.validate(guess)
-    print([res.name for res in result])
+    # result = mm.validate(prev_guess)
+    # print([res.name for res in result])
+    result = None
 
-    next_guess = generate_combination(OPTIONS)
-    print(next_guess)
-    print(valid_possibility(guess, result, next_guess))
-
-    print(len(all_choices(OPTIONS)))
-    all_valid_choices = [opt for opt in all_choices(OPTIONS) if valid_possibility(guess, result, opt)]
+    all_valid_choices = sorted(list(all_choices(OPTIONS)))
     print(len(all_valid_choices))
+    clues = []
+    count = 0
+    while result != [GuessResult.EXACT_MATCH] * len(solution):
+        count += 1
+        guess = all_valid_choices[0]
+        print("Guess {}: {}".format(count, guess))
+        result = mm.validate(guess)
+        print("Result:", [res.name for res in result])
+
+        all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
+        print(len(all_valid_choices))
+        print(all_valid_choices[0:10])
+        print(valid_possibility(guess, result, all_valid_choices[0]))
+        clues.append((guess, result))
+        exit()
 
     # solution = ['red', 'white', 'white', 'white']
-    # guess = ['purple', 'purple', 'white', 'yellow']
-    # print(MasterMind(solution).validate(guess))
+    # prev_guess = ['purple', 'purple', 'white', 'yellow']
+    # print(MasterMind(solution).validate(prev_guess))
 
     # ['yellow', 'gray', 'blue', 'yellow']
     # ['yellow', 'blue', 'black', 'blue']
