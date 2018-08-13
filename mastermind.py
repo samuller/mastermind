@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from random import randint
-from enum import Enum
-from typing import Any, Collection, List, TypeVar
 import itertools
+from enum import Enum
+from random import randint
+from typing import Any, Collection, List, Tuple, TypeVar
 
 
 class GuessResult(Enum):
@@ -93,13 +93,13 @@ def all_choices(options: List[Any], count: int=4, duplicates: bool=True):
     return set(itertools.permutations(all_options, count))
 
 
-def iteratively_solve(mm: MasterMind, options: List[T], length: int=4) -> List[T]:
+def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print) -> Tuple[List[T], List[Any]]:
     guess = None
     result = None
 
     all_valid_choices = sorted(list(all_choices(options)))
-    print("Possibilities: ", len(all_valid_choices))
-    print()
+    log("Possibilities: ", len(all_valid_choices))
+    log("")
 
     clues = []
     count = 0
@@ -107,28 +107,41 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4) -> List[T
         count += 1
 
         guess = all_valid_choices[0]
-        print("Guess {}: {}".format(count, guess))
+        log("Guess {}: {}".format(count, guess))
         result = mm.validate(guess)
-        print("Result:", [res.name for res in result])
+        log("Result:", [res.name for res in result])
 
         all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
-        print("Possibilities: ", len(all_valid_choices))
+        log("Possibilities: ", len(all_valid_choices))
         # print(all_valid_choices[0:10])
         # print(valid_possibility(guess, result, all_valid_choices[0]))
         clues.append((guess, result))
-        print()
+        log("")
 
-    return guess
+    return guess, clues
 
 
 def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
 
-    solution = generate_combination(OPTIONS)
+    solution = ['yellow', 'yellow', 'white', 'red'] # generate_combination(OPTIONS)
     print("Secret solution:", solution)
 
     mm = MasterMind(solution)
-    iteratively_solve(mm, OPTIONS)
+    iteratively_solve(mm, OPTIONS)  # , log=lambda *x: x)
+
+    solve_counts = []
+    for i in range(100):
+        solution = generate_combination(OPTIONS)
+        mm = MasterMind(solution)
+        _, clues = iteratively_solve(mm, OPTIONS, log=lambda *x: x)
+        solve_counts.append(len(clues))
+        if len(clues) > 10:
+            print(solution)
+            print(clues)
+
+    import collections
+    print(collections.Counter(solve_counts))
 
     # solution = ['red', 'white', 'white', 'white']
     # prev_guess = ['purple', 'purple', 'white', 'yellow']
