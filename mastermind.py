@@ -2,6 +2,7 @@
 from random import randint
 from enum import Enum
 from typing import Any, Collection, List, TypeVar
+import itertools
 
 
 class GuessResult(Enum):
@@ -59,6 +60,15 @@ class MasterMind:
         return validate_solution(self._solution, guess)
 
 
+def valid_possibility(prev_guess: List[T], prev_result: Collection[GuessResult], next_guess: List[T]) -> bool:
+    """
+    For the next guess to be a possible solution, the relationship between the next guess and the previous
+    guess should be the same as the relationship between the previous guess and the solution.
+    """
+    cmp_result = validate_solution(prev_guess, next_guess)
+    return set(prev_result) == set(cmp_result)
+
+
 def generate_combination(options: List[Any], count: int=4, duplicates=True):
     if not duplicates and len(options) < count:
         raise Exception("Not enough options provided to generate non-duplicate combinations")
@@ -74,6 +84,15 @@ def generate_combination(options: List[Any], count: int=4, duplicates=True):
     return combination
 
 
+def all_choices(options, count=4, duplicates=True):
+    all_options = list(options)
+    if duplicates:
+        all_options = options * count
+    # When allowing duplicate options the number of unique permutations and combinations are identical
+    # i.e. set(combinations) == set(permutations)
+    return set(itertools.permutations(all_options, count))
+
+
 def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
 
@@ -86,6 +105,14 @@ def main():
     mm = MasterMind(solution)
     result = mm.validate(guess)
     print([res.name for res in result])
+
+    next_guess = generate_combination(OPTIONS)
+    print(next_guess)
+    print(valid_possibility(guess, result, next_guess))
+
+    print(len(all_choices(OPTIONS)))
+    all_valid_choices = [opt for opt in all_choices(OPTIONS) if valid_possibility(guess, result, opt)]
+    print(len(all_valid_choices))
 
     # solution = ['red', 'white', 'white', 'white']
     # guess = ['purple', 'purple', 'white', 'yellow']
