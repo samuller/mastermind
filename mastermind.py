@@ -28,7 +28,7 @@ def identify_colour_matches(solution: List[T], guess: List[T]) -> Collection[T]:
     return color_matches
 
 
-def mastermind_validate(solution: List[T], guess: List[T]) -> List[GuessResult]:
+def validate_solution(solution, guess: List[T]) -> List[GuessResult]:
     if solution == guess:
         return [GuessResult.EXACT_MATCH] * len(guess)
 
@@ -48,6 +48,15 @@ def mastermind_validate(solution: List[T], guess: List[T]) -> List[GuessResult]:
     result.extend([GuessResult.ONLY_COLOR_CORRECT] * len(match_cols))
 
     return result
+
+
+class MasterMind:
+
+    def __init__(self, solution: List[T]):
+        self._solution = solution
+
+    def validate(self, guess: List[T]) -> List[GuessResult]:
+        return validate_solution(self._solution, guess)
 
 
 def generate_combination(options: List[Any], count: int=4, duplicates=True):
@@ -74,12 +83,13 @@ def main():
     guess = generate_combination(OPTIONS)
     print(guess)
 
-    result = mastermind_validate(solution, guess)
+    mm = MasterMind(solution)
+    result = mm.validate(guess)
     print([res.name for res in result])
 
     # solution = ['red', 'white', 'white', 'white']
     # guess = ['purple', 'purple', 'white', 'yellow']
-    # print(mastermind_validate(solution, guess))
+    # print(MasterMind(solution).validate(guess))
 
     # ['yellow', 'gray', 'blue', 'yellow']
     # ['yellow', 'blue', 'black', 'blue']
