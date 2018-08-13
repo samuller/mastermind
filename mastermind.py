@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import itertools
+import numpy as np
 from enum import Enum
 from random import randint
+import matplotlib.pyplot as plt
 from typing import Any, Collection, List, Tuple, TypeVar
 
 
@@ -124,7 +126,7 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
 def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
 
-    solution = ['yellow', 'yellow', 'white', 'red'] # generate_combination(OPTIONS)
+    solution = generate_combination(OPTIONS)  # ['white', 'yellow', 'white', 'red']
     print("Secret solution:", solution)
 
     mm = MasterMind(solution)
@@ -142,6 +144,11 @@ def main():
 
     import collections
     print(collections.Counter(solve_counts))
+    # hist, bins = np.histogram(solve_counts)
+    plt.hist(solve_counts, 0.5 + np.arange(0, 12))
+    plt.title("Histogram of guesses needed")
+    plt.show()
+
 
     # solution = ['red', 'white', 'white', 'white']
     # prev_guess = ['purple', 'purple', 'white', 'yellow']
