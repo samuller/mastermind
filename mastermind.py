@@ -199,18 +199,20 @@ def manual_input(options: List[T], option_chars:List[chr], length: int=4, duplic
 def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
 
-    manual_options = {
-        'p': 'purple',
-        'r': 'red',
-        'u': 'blue',
-        'g': 'green',
-        'y': 'yellow',
-        'o': 'orange',
-        'n': 'brown',
-        'i': 'pink'
-    }
-    options_tuple = manual_options.items()
-    manual_input([v for _, v in options_tuple], [k for k, _ in options_tuple], length=4, duplicates=False)
+    # Manually solve
+    # manual_options = {
+    #     # 'p': 'purple',
+    #     # 'r': 'red',
+    #     'u': 'blue',
+    #     'g': 'green',
+    #     'y': 'yellow',
+    #     'o': 'orange',
+    #     'n': 'brown',
+    #     'i': 'pink',
+    #     # 'e': 'empty'
+    # }
+    # options_tuple = manual_options.items()
+    # manual_input([v for _, v in options_tuple], [k for k, _ in options_tuple], length=4, duplicates=False)
 
     solution = generate_combination(OPTIONS)  # ['white', 'yellow', 'white', 'red']
     print("Secret solution:", solution)
