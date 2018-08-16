@@ -121,8 +121,53 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
     return guess, clues
 
 
+def manual_input(options: List[T], option_chars:List[chr], length: int=4, duplicates=True):
+    result_chars = {
+        'b': GuessResult.EXACT_MATCH,
+        'w': GuessResult.ONLY_COLOR_CORRECT,
+        'p': GuessResult.ONLY_POSITION_CORRECT,
+        ' ': GuessResult.INCORRECT
+    }
+
+    all_valid_choices = sorted(list(all_choices(options, length, duplicates=duplicates)))
+
+    result = None
+    while result != [GuessResult.EXACT_MATCH] * length:
+        print('Choices available: ', len(all_valid_choices))
+        rnd_choice = all_valid_choices[0]
+        rnd_choice_inp = ''.join([option_chars[options.index(col)] for col in rnd_choice])
+        print('Random valid choice: {} [{}]'.format(', '.join(rnd_choice),rnd_choice_inp))
+
+        guess_inp = input("Guess: ")
+        guess = [options[option_chars.index(col)] for col in guess_inp]
+        result_inp = input("Result: ")
+        result = [result_chars[res] for res in result_inp]
+
+        all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
+        if len(all_valid_choices) == 0:
+            print('Logical inconsistency')
+            exit()
+        print()
+
+    exit()
+
+
+
 def main():
     OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
+
+    manual_options = {
+        'p': 'purple',
+        'r': 'red',
+        'u': 'blue',
+        'g': 'green',
+        'y': 'yellow',
+        'o': 'orange',
+        'n': 'brown',
+        'i': 'pink'
+    }
+    options_tuple = manual_options.items()
+    manual_input([v for _, v in options_tuple], [k for k, _ in options_tuple], length=4, duplicates=False)
 
     solution = generate_combination(OPTIONS)  # ['white', 'yellow', 'white', 'red']
     print("Secret solution:", solution)
