@@ -2,7 +2,7 @@
 import itertools
 from enum import Enum
 from random import randint
-from typing import Any, Collection, List, Tuple, TypeVar
+from typing import Any, Collection, List, Optional, Tuple, TypeVar
 
 
 class GuessResult(Enum):
@@ -13,6 +13,10 @@ class GuessResult(Enum):
 
 
 T = TypeVar('T')
+Guess = List[Any]
+Result = List[Any]
+Clue = Tuple[Guess, Result]
+
 
 def identify_exact_matches(solution: List[T], guess: List[T]) -> Collection[int]:
     solution_set = {(idx, val) for idx, val in enumerate(solution)}
@@ -69,14 +73,14 @@ def valid_possibility(prev_guess: List[T], prev_result: Collection[GuessResult],
     return list(prev_result) == list(cmp_result)
 
 
-def generate_combination(options: List[Any], count: int=4, duplicates=True):
-    if not duplicates and len(options) < count:
+def generate_combination(options: List[Any], length: int=4, duplicates=True):
+    if not duplicates and len(options) < length:
         raise Exception("Not enough options provided to generate non-duplicate combinations")
 
     # Copy options since we might alter it
     options = list(options)
     combination = []
-    for i in range(count):
+    for i in range(length):
         choice_idx = randint(0, len(options) - 1)
         combination.append(options[choice_idx])
         if not duplicates:
@@ -84,16 +88,16 @@ def generate_combination(options: List[Any], count: int=4, duplicates=True):
     return combination
 
 
-def all_choices(options: List[Any], count: int=4, duplicates: bool=True):
+def all_choices(options: List[Any], length: int=4, duplicates: bool=True):
     all_options = list(options)
     if duplicates:
-        all_options = options * count
+        all_options = options * length
     # When allowing duplicate options the number of unique permutations and combinations are identical
     # i.e. set(combinations) == set(permutations)
-    return set(itertools.permutations(all_options, count))
+    return set(itertools.permutations(all_options, length))
 
 
-def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print) -> Tuple[List[T], List[Any]]:
+def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print) -> Tuple[Guess, List[Clue]]:
     guess = None
     result = None
 
