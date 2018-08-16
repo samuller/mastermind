@@ -68,6 +68,24 @@ class InMemoryPruner(ValidSolutionGenerator):
         return 'Choices available: {}'.format(len(self.all_valid_choices))
 
 
+class RandomGuessValidator(ValidSolutionGenerator):
+
+    def __init__(self, options: List[Any], length: int=4, duplicates: bool=True):
+        super().__init__(options, length, duplicates)
+        self.last_guess_count = None
+
+    def generate(self):
+        rnd_choice, self.last_guess_count = generate_random_valid_guess(
+            self.clues, self.options, self.length, self.duplicates, max_tries=None)
+        if rnd_choice is None:
+            print("Couldn't find valid guess")
+            exit()
+        return rnd_choice
+
+    def stat_msg(self):
+        return 'Guesses needed: {}'.format(self.last_guess_count)
+
+
 def identify_exact_matches(solution: List[T], guess: List[T]) -> Collection[int]:
     solution_set = {(idx, val) for idx, val in enumerate(solution)}
     guess_set = {(idx, val) for idx, val in enumerate(guess)}
@@ -142,7 +160,7 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
     guess = None
     result = None
 
-    guesser = InMemoryPruner(options, length, duplicates=True)
+    guesser = RandomGuessValidator(options, length, duplicates=True)
     log(guesser.stat_msg())
     log("")
 
@@ -162,6 +180,28 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
         log("")
 
     return guess, clues
+
+
+def generate_random_valid_guess(clues: List[Clue],
+                                options: List[Any], length: int=4, duplicates=True,
+                                max_tries: Optional[int]=1000) -> Tuple[Guess, int]:
+    guess = None
+    guess_valid = False
+    count = 0
+    while not guess_valid:
+        guess = generate_combination(options, length, duplicates)
+        guess_valid = True
+        for clue in clues:
+            prev_guess, prev_result = clue
+            guess_valid = guess_valid and valid_possibility(prev_guess, prev_result, guess)
+            if not guess_valid:
+                continue
+        count += 1
+        if max_tries is not None and count > max_tries:
+            guess = None
+            break
+
+    return guess, count
 
 
 def manual_input(options: List[T], option_chars:List[chr], length: int=4, duplicates=True):
