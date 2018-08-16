@@ -3,6 +3,7 @@ import itertools
 from enum import Enum
 from random import randint
 from typing import Any, Collection, List, Optional, Tuple, TypeVar
+from abc import ABC, abstractmethod
 
 
 T = TypeVar('T')
@@ -25,6 +26,46 @@ class MasterMind:
 
     def validate(self, guess: List[T]) -> List[GuessResult]:
         return validate_solution(self._solution, guess)
+
+
+class ValidSolutionGenerator(ABC):
+
+    def __init__(self, options: List[Any], length: int=4, duplicates: bool=True):
+        self.options = options
+        self.length = length
+        self.duplicates = duplicates
+        self.clues = []
+
+    def add_clue(self, clue: Clue):
+        self.clues.append(clue)
+
+    @abstractmethod
+    def generate(self):
+        pass
+
+    def stat_msg(self):
+        return ''
+
+
+class InMemoryPruner(ValidSolutionGenerator):
+
+    def __init__(self, options: List[Any], length: int=4, duplicates: bool=True):
+        super().__init__(options, length, duplicates)
+        self.all_valid_choices = sorted(list(all_choices(options, length, duplicates=duplicates)))
+
+    def add_clue(self, clue: Clue):
+        super().add_clue(clue)
+        guess, result = clue
+        self.all_valid_choices = [opt for opt in self.all_valid_choices if valid_possibility(guess, result, opt)]
+        if len(self.all_valid_choices) == 0:
+            print('Logical inconsistency')
+            exit()
+
+    def generate(self):
+        return self.all_valid_choices[0]
+
+    def stat_msg(self):
+        return 'Choices available: {}'.format(len(self.all_valid_choices))
 
 
 def identify_exact_matches(solution: List[T], guess: List[T]) -> Collection[int]:
@@ -101,8 +142,8 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
     guess = None
     result = None
 
-    all_valid_choices = sorted(list(all_choices(options)))
-    log("Possibilities: ", len(all_valid_choices))
+    guesser = InMemoryPruner(options, length, duplicates=True)
+    log(guesser.stat_msg())
     log("")
 
     clues = []
@@ -110,15 +151,13 @@ def iteratively_solve(mm: MasterMind, options: List[T], length: int=4, log=print
     while result != [GuessResult.EXACT_MATCH] * length:
         count += 1
 
-        guess = all_valid_choices[0]
+        guess = guesser.generate()
         log("Guess {}: {}".format(count, guess))
         result = mm.validate(guess)
         log("Result:", [res.name for res in result])
 
-        all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
-        log("Possibilities: ", len(all_valid_choices))
-        # print(all_valid_choices[0:10])
-        # print(valid_possibility(guess, result, all_valid_choices[0]))
+        guesser.add_clue((guess, result))
+        log(guesser.stat_msg())
         clues.append((guess, result))
         log("")
 
