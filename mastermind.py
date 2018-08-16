@@ -5,6 +5,12 @@ from random import randint
 from typing import Any, Collection, List, Optional, Tuple, TypeVar
 
 
+T = TypeVar('T')
+Guess = List[Any]
+Result = List[Any]
+Clue = Tuple[Guess, Result]
+
+
 class GuessResult(Enum):
     INCORRECT = 0
     ONLY_COLOR_CORRECT = 1
@@ -12,10 +18,13 @@ class GuessResult(Enum):
     EXACT_MATCH = 3
 
 
-T = TypeVar('T')
-Guess = List[Any]
-Result = List[Any]
-Clue = Tuple[Guess, Result]
+class MasterMind:
+
+    def __init__(self, solution: List[T]):
+        self._solution = solution
+
+    def validate(self, guess: List[T]) -> List[GuessResult]:
+        return validate_solution(self._solution, guess)
 
 
 def identify_exact_matches(solution: List[T], guess: List[T]) -> Collection[int]:
@@ -53,15 +62,6 @@ def validate_solution(solution: List[T], guess: List[T]) -> List[GuessResult]:
     result.extend([GuessResult.ONLY_COLOR_CORRECT] * len(match_cols))
 
     return result
-
-
-class MasterMind:
-
-    def __init__(self, solution: List[T]):
-        self._solution = solution
-
-    def validate(self, guess: List[T]) -> List[GuessResult]:
-        return validate_solution(self._solution, guess)
 
 
 def valid_possibility(prev_guess: List[T], prev_result: Collection[GuessResult], next_guess: List[T]) -> bool:
