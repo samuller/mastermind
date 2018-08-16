@@ -56,6 +56,7 @@ class InMemoryPruner(ValidSolutionGenerator):
     def add_clue(self, clue: Clue):
         super().add_clue(clue)
         guess, result = clue
+        # Prune list of possible choices based on newest clue
         self.all_valid_choices = [opt for opt in self.all_valid_choices if valid_possibility(guess, result, opt)]
         if len(self.all_valid_choices) == 0:
             print('Logical inconsistency')
@@ -212,28 +213,26 @@ def manual_input(options: List[T], option_chars:List[chr], length: int=4, duplic
         ' ': GuessResult.INCORRECT
     }
 
-    all_valid_choices = sorted(list(all_choices(options, length, duplicates=duplicates)))
+    guesser = RandomGuessValidator(options, length, duplicates)
 
     result = None
     while result != [GuessResult.EXACT_MATCH] * length:
-        print('Choices available: ', len(all_valid_choices))
-        rnd_choice = all_valid_choices[0]
+        rnd_choice = guesser.generate()
+        print(guesser.stat_msg())
         rnd_choice_inp = ''.join([option_chars[options.index(col)] for col in rnd_choice])
         print('Random valid choice: {} [{}]'.format(', '.join(rnd_choice),rnd_choice_inp))
 
         guess_inp = input("Guess: ")
+        if guess_inp == '':
+            guess_inp = rnd_choice_inp
         guess = [options[option_chars.index(col)] for col in guess_inp]
         result_inp = input("Result: ")
         result = [result_chars[res] for res in result_inp]
 
-        all_valid_choices = [opt for opt in all_valid_choices if valid_possibility(guess, result, opt)]
-        if len(all_valid_choices) == 0:
-            print('Logical inconsistency')
-            exit()
+        guesser.add_clue((guess, result))
         print()
 
     exit()
-
 
 
 def main():
