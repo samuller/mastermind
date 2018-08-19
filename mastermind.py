@@ -60,9 +60,11 @@ def manual_input(options: List[T], option_chars:List[chr], length: int=4, duplic
     exit()
 
 
+OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
+LENGTH = 4
+
+
 def main():
-    OPTIONS = ["black", "gray", "white", "red", "green", "blue", "yellow", "purple"]
-    LENGTH = 4
 
     # Manually solve
     # manual_options = {
@@ -84,6 +86,23 @@ def main():
 
     mm = MasterMind(solution)
     iteratively_solve(mm, OPTIONS, length=LENGTH)
+
+    # Benchmark methods of generating possibilities. Determine if generating a list of strings slow enough that we
+    # should rather represent each possibility by an assigned numeric value which can be interpreted/processed back
+    # to a list of string values.
+    import timeit
+    print(timeit.timeit('generate_combination(OPTIONS, length=LENGTH)', number=10000,
+                        globals=globals()))
+    print(timeit.timeit('randint(0, max - 1)', number=10000,
+                        setup="from math import pow\n" + "max = pow(len(OPTIONS),LENGTH)",
+                        globals=globals()))
+    print(timeit.timeit('numpy.random.randint(max)', number=10000,
+                        setup="import numpy.random\n" + "max = pow(len(OPTIONS),LENGTH)",
+                        globals=globals()))
+    print(timeit.timeit(
+        "validate_solution(['red', 'white', 'white', 'white'], ['purple', 'purple', 'white', 'yellow'])",
+        number=10000,  globals=globals()))
+    exit()
 
     solve_counts = []
     for i in range(100):
