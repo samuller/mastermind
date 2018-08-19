@@ -22,6 +22,11 @@ class ValidSolutionGenerator(ABC):
 
 
 class InMemoryPruner(ValidSolutionGenerator):
+    """
+    Generates all possibilities in memory and then prunes the possibilities with each additional clue.
+
+    A large possibility space will take long to generate and use up lots of memory.
+    """
 
     def __init__(self, options: List[Any], length: int=4, duplicates: bool=True):
         super().__init__(options, length, duplicates)
@@ -44,6 +49,11 @@ class InMemoryPruner(ValidSolutionGenerator):
 
 
 class RandomGuessValidator(ValidSolutionGenerator):
+    """
+    Takes random guesses which it then validates with the list of clues.
+
+    A large probability space will take longer and longer to generate valid guesses.
+    """
 
     def __init__(self, options: List[Any], length: int=4, duplicates: bool=True):
         super().__init__(options, length, duplicates)
